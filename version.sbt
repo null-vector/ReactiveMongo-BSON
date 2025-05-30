@@ -1,4 +1,4 @@
-ThisBuild / dynverVTagPrefix := false
+ThisBuild / dynverVTagPrefix := true
 
 ThisBuild / version := {
   val Stable = """([0-9]+)\.([0-9]+)\.([0-9]+)(|-RC[0-9]+)""".r
@@ -14,7 +14,7 @@ ThisBuild / version := {
             (ThisBuild / previousStableVersion).value
         }
 
-        previous match {
+        Some("1.1.0-RC15") match {
           case Some(previousVer) => {
             val current = (for {
               Seq(maj, min, patch, rc) <- Stable.unapplySeq(previousVer)
