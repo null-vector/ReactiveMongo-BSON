@@ -12,6 +12,7 @@ import java.time.{
   OffsetDateTime,
   ZonedDateTime
 }
+import scala.collection.mutable.Map
 
 import reactivemongo.api.bson as pkg
 

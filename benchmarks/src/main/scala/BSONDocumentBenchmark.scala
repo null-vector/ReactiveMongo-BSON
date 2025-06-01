@@ -2,7 +2,7 @@ package reactivemongo
 package api.bson
 
 import scala.language.implicitConversions
-
+import scala.collection.mutable.Map
 import reactivemongo.api.bson.buffer.{
   DefaultBufferHandler,
   ReadableBuffer,

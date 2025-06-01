@@ -237,7 +237,7 @@ private[reactivemongo] trait PlainBufferHandler { self: BufferHandler =>
     // assert(length == b.size)
 
     val elms = Seq.newBuilder[BSONElement]
-    val fields = MMap.empty[String, BSONValue]
+    val fields = MMapBuilder.empty[String, BSONValue]()
 
     @scala.annotation.tailrec
     def read(): Unit = {
@@ -258,7 +258,7 @@ private[reactivemongo] trait PlainBufferHandler { self: BufferHandler =>
 
     read()
 
-    BSONDocument(elms.result(), fields.toMap)
+    BSONDocument(elms.result(), fields)
   }
 }
 
@@ -269,7 +269,7 @@ private[reactivemongo] trait StrictBufferHandler { self: BufferHandler =>
 
     // assert(length == b.size)
 
-    val fields = MMap.empty[String, BSONValue]
+    val fields = MMapBuilder.empty[String, BSONValue]()
 
     @scala.annotation.tailrec
     def read(): Unit = {

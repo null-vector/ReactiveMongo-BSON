@@ -25,6 +25,7 @@ import reactivemongo.api.bson.exceptions.{
   HandlerException,
   TypeDoesNotMatchException
 }
+import scala.collection.mutable.Map
 
 import org.specs2.matcher.MatchResult
 import org.specs2.matcher.TypecheckMatchers._
@@ -78,7 +79,7 @@ final class MacroSpec
   "Formatter" should {
     "handle primitives" in {
       roundtrip(
-        Primitives(1.2, "hai", true, 42, Long.MaxValue),
+        Primitives(1.2, "hai", bl = true, 42, Long.MaxValue),
         Macros.handler[Primitives]
       )
     }

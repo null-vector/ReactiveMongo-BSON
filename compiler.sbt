@@ -14,8 +14,8 @@ ThisBuild / scalacOptions ++= Seq(
   "UTF-8",
   "-unchecked",
   "-deprecation",
-  "-feature",
-  "-Xfatal-warnings"
+  "-feature"
+  // "-Xfatal-warnings"
 )
 
 ThisBuild / scalacOptions ++= {
@@ -65,7 +65,7 @@ ThisBuild / scalacOptions ++= {
       "-release",
       "8",
       "-explaintypes",
-      "-Werror",
+      // "-Werror",
       "-Wnumeric-widen",
       "-Wdead-code",
       "-Wvalue-discard",

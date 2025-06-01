@@ -96,6 +96,7 @@ lazy val api = (project in file("api"))
         }
       },
       libraryDependencies ++= reactivemongoShaded.value,
+      libraryDependencies += "org.eclipse.collections" % "eclipse-collections" % "11.1.0",
       mimaBinaryIssueFilters ++= {
         // TODO: Purge after release
         import com.typesafe.tools.mima.core._

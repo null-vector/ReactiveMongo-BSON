@@ -6,7 +6,7 @@ private[bson] final class DocumentBuilder
     extends MBuilder[ElementProducer, BSONDocument] {
 
   private val elms = Seq.newBuilder[BSONElement]
-  private val fs = Map.newBuilder[String, BSONValue]
+  private val fs = MMapBuilder.empty[String, BSONValue]()
 
   def addOne(elem: ElementProducer): this.type = {
     val es = elem.generate()

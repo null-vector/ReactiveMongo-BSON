@@ -16,10 +16,9 @@ import scala.language.implicitConversions
 import scala.util.{ Failure, Success, Try }
 import scala.util.control.NonFatal
 
-import scala.collection.immutable.{ HashMap, IndexedSeq, LinearSeq }
+import scala.collection.immutable.{ IndexedSeq, LinearSeq }
 import scala.collection.mutable.{
   Builder => MBuilder,
-  HashMap => MMap,
   HashSet => MSet
 }
 
@@ -1165,7 +1164,7 @@ object BSONObjectID {
    *
    * @see [[fromTime]]
    */
-  def generate(): BSONObjectID = fromTime(System.currentTimeMillis, false)
+  def generate(): BSONObjectID = fromTime(System.currentTimeMillis, fillOnlyTimestamp = false)
 
   /**
    * Generates a new BSON ObjectID from the given timestamp in milliseconds.
@@ -1986,7 +1985,7 @@ sealed abstract class BSONDocument
   val bsonType = "Object"
 
   /** The document fields */
-  private[bson] def fields: Map[String, BSONValue]
+  private[bson] def fields: scala.collection.mutable.Map[String, BSONValue]
 
   /**
    * The document fields as a sequence of [[BSONElement]]s.
@@ -2003,7 +2002,7 @@ sealed abstract class BSONDocument
    * // => Map("foo" -> BSONInteger(1))
    * }}}
    */
-  @inline final def toMap: Map[String, BSONValue] = fields
+  @inline final def toMap: scala.collection.mutable.Map[String, BSONValue] = fields
 
   /**
    * Checks whether the given key is found in this element set.
@@ -2077,7 +2076,12 @@ sealed abstract class BSONDocument
    * }}}
    */
   def ++(doc: BSONDocument): BSONDocument = new BSONDocument {
-    lazy val fields: Map[String, BSONValue] = self.fields ++ doc.fields
+    lazy val fields: scala.collection.mutable.Map[String, BSONValue] = {
+      val m = MMapBuilder.empty[String, BSONValue]()
+      m ++= self.fields
+      m ++= doc.fields
+      m
+    }
 
     val elements =
       (toLazy(self.elements) ++ toLazy(doc.elements)).distinct
@@ -2108,7 +2112,7 @@ sealed abstract class BSONDocument
       val elements = (toLazy(self.elements) ++ toLazy(seq)).distinct
 
       lazy val fields = {
-        val m = MMap.empty[String, BSONValue]
+        val m = MMapBuilder.empty[String, BSONValue]()
 
         m ++= self.fields
 
@@ -2119,7 +2123,7 @@ sealed abstract class BSONDocument
           case _ =>
         }
 
-        m.toMap
+        m
       }
 
       @inline def headOption = self.headOption
@@ -2138,7 +2142,12 @@ sealed abstract class BSONDocument
    * }}}
    */
   def --(keys: String*): BSONDocument = new BSONDocument {
-    val fields = self.fields -- keys
+    val fields             = {
+      val m = MMapBuilder.empty[String, BSONValue]()
+      m ++= self.fields
+      m --= keys
+      m
+    }
     lazy val elements = self.elements.filterNot { e => keys.contains(e.name) }
     @inline def headOption = elements.headOption
     val isEmpty = fields.isEmpty
@@ -2303,7 +2312,7 @@ sealed abstract class BSONDocument
 
   // ---
 
-  private[bson] final def copy(newFields: Map[String, BSONValue] = self.fields): BSONDocument = new BSONDocument {
+  private[bson] final def copy(newFields: scala.collection.mutable.Map[String, BSONValue] = self.fields): BSONDocument = new BSONDocument {
     val fields = newFields
 
     val elements = toLazy(newFields).map {
@@ -2505,7 +2514,12 @@ sealed abstract class BSONStrictDocument extends BSONDocument
 #else
     new BSONStrictDocument {
 #end
-      lazy val fields: Map[String, BSONValue] = self.fields ++ doc.fields
+      lazy val fields: scala.collection.mutable.Map[String, BSONValue] = {
+        val m = MMapBuilder.empty[String, BSONValue]()
+        m ++= self.fields
+        m ++= doc.fields
+        m
+      }
 
       val elements = BSONDocument.dedupElements(
         toLazy(self.elements) ++ toLazy(doc.elements))
@@ -2537,7 +2551,7 @@ sealed abstract class BSONStrictDocument extends BSONDocument
         toLazy(self.elements) ++ toLazy(seq))
 
       lazy val fields = {
-        val m = MMap.empty[String, BSONValue]
+        val m = MMapBuilder.empty[String, BSONValue]()
 
         m ++= self.fields
 
@@ -2548,7 +2562,7 @@ sealed abstract class BSONStrictDocument extends BSONDocument
           case _ =>
         }
 
-        m.toMap
+        m
       }
 
       @inline def headOption = self.headOption
@@ -2561,7 +2575,12 @@ sealed abstract class BSONStrictDocument extends BSONDocument
 #else
     new BSONStrictDocument {
 #end
-      val fields = self.fields -- keys
+      val fields             = {
+        val m = MMapBuilder.empty[String, BSONValue]()
+        m ++= self.fields
+        m --= keys
+        m
+      }
       lazy val elements = self.elements.filterNot { e => keys.contains(e.name) }
       @inline def headOption = elements.headOption
       val isEmpty = fields.isEmpty
@@ -2695,13 +2714,13 @@ object BSONDocument {
       }
 
       lazy val fields = {
-        val m = MMap.empty[String, BSONValue]
+        val m = MMapBuilder.empty[String, BSONValue]()
 
         pairs.foreach {
           case (k, v) => m.put(k, v)
         }
 
-        m.toMap
+        m
       }
 
       val isEmpty = elms.isEmpty
@@ -2759,13 +2778,13 @@ object BSONDocument {
       }
 
       lazy val fields = {
-        val m = MMap.empty[String, BSONValue]
+        val m = MMapBuilder.empty[String, BSONValue]()
 
         pairs.foreach {
           case (k, v) => m.put(k, v)
         }
 
-        m.toMap
+        m
       }
 
       val isEmpty = elms.isEmpty
@@ -2792,7 +2811,7 @@ object BSONDocument {
   /** Internal (optimized/eager) factory. */
   private[bson] def apply(
     elms: Seq[BSONElement],
-    fs: Map[String, BSONValue]): BSONDocument = new BSONDocument {
+    fs: scala.collection.mutable.Map[String, BSONValue]): BSONDocument = new BSONDocument {
     val elements = elms
     lazy val fields = fs
     val isEmpty = elms.isEmpty
@@ -2802,7 +2821,7 @@ object BSONDocument {
   /** Internal (optimized/eager) strict factory. */
   private[bson] def strict(
     elms: Seq[BSONElement],
-    fs: Map[String, BSONValue]): BSONDocument.Strict =
+    fs: scala.collection.mutable.Map[String, BSONValue]): BSONDocument.Strict =
 #if( $scalaVersion.indexOf("2.") == 0 )
     new BSONDocument with BSONStrictDocument {
 #else
@@ -2816,7 +2835,7 @@ object BSONDocument {
 
   /** An empty BSONDocument. */
   val empty: BSONDocument = new BSONDocument {
-    val fields = HashMap.empty[String, BSONValue]
+    val fields = MMapBuilder.empty[String, BSONValue]()
     val elements = Seq.empty[BSONElement]
     val isEmpty = true
     override val size = 0
@@ -2842,8 +2861,8 @@ object BSONDocument {
 
   // ---
 
-  private[bson] def toMap(seq: Iterable[ElementProducer]): Map[String, BSONValue] = {
-    val m = MMap.empty[String, BSONValue]
+  private[bson] def toMap(seq: Iterable[ElementProducer]): scala.collection.mutable.Map[String, BSONValue] = {
+    val m = MMapBuilder.empty[String, BSONValue]()
 
     seq.foreach {
       case BSONElement(k, v) => m.put(k, v)
@@ -2857,12 +2876,12 @@ object BSONDocument {
       }
     }
 
-    m.toMap
+    m
   }
 
   private[bson] def dedupElements(in: Seq[BSONElement]): IndexedSeq[BSONElement] = {
     var elms = scala.collection.mutable.IndexedSeq.empty[BSONElement]
-    val indexes = MMap.empty[String, Int]
+    val indexes = MMapBuilder.empty[String, Int]()
 
     var i = -1
     in.foreach { elm =>
@@ -3083,13 +3102,13 @@ object ElementProducer extends ElementProducerLowPriority1 {
         case (e: BSONElement, doc: BSONDocument) =>
           new BSONDocument {
             lazy val fields = {
-              val m = MMap.empty[String, BSONValue]
+              val m = MMapBuilder.empty[String, BSONValue]()
 
               (e +: doc.elements).foreach { el =>
                 m.put(el.name, el.value)
               }
 
-              m.toMap
+              m
             }
 
             val elements = (e +: doc.elements).distinct

@@ -27,8 +27,15 @@ private[bson] trait Utils {
 
   @inline private[bson] def toLazy[T](it: Iterable[T]) = it.to(LazyList)
 
-  @inline private[bson] def mapValues[K, V, U](m: Map[K, V])(f: V => U) =
-    m.view.mapValues(f).toMap
+  @inline private[bson] def mapValues[K, V, U](
+      m: scala.collection.mutable.Map[K, V]
+    )(f: V => U
+    ) =
+    m.foldLeft(MMapBuilder.empty[K, U]()) {
+      case (um, (k, v)) =>
+        um.put(k, f(v))
+        um
+    }
 
   import scala.collection.Factory
   import scala.util.{ Failure, Try, Success }
