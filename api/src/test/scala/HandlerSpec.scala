@@ -2,6 +2,8 @@ package reactivemongo.api.bson
 
 import java.util.{ Locale, UUID }
 
+import scala.collection.mutable.Map
+
 import java.net.{ URI, URL }
 
 import java.time.{

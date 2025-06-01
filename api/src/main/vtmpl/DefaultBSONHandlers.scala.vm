@@ -16,6 +16,8 @@ import java.net.{ URI, URL }
 
 import java.time.{ Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, ZoneId, ZonedDateTime }
 
+import scala.collection.mutable.Map
+
 import scala.util.{ Failure, Success, Try }
 
 import scala.collection.immutable.IndexedSeq

@@ -13,9 +13,14 @@ private[bson] trait Utils {
   @inline private[bson] def toLazy[T](it: Traversable[T]) = it.toStream
 
   @inline private[bson] def mapValues[K, V, U](
-      m: Map[K, V]
+      m: scala.collection.mutable.Map[K, V]
     )(f: V => U
-    ): Map[K, U] = m.transform { case (_, v) => f(v) }
+    ): scala.collection.mutable.Map[K, U] =
+    m.foldLeft(MMapBuilder.empty[K, U]()) {
+      case (um, (k, v)) =>
+        um.put(k, f(v))
+        um
+    }
 
   import scala.language.higherKinds
   import scala.collection.generic.CanBuildFrom

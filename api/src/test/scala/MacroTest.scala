@@ -24,6 +24,7 @@ import reactivemongo.api.bson.Macros.Annotations.{
   Reader,
   Writer
 }
+import scala.collection.mutable.Map
 
 object MacroTest extends MacroTestCompat {
 

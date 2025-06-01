@@ -14,6 +14,7 @@ import java.time.{
 }
 
 import reactivemongo.api.bson as pkg
+import scala.collection.mutable.Map
 
 private[bson] trait BSONWriterInstances extends BSONWriterInstancesLowPrio:
 

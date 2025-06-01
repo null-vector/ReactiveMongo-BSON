@@ -6,7 +6,7 @@ DIR=`dirname $0 | sed -e "s|^./|$PWD/|"`
 
 cd "$DIR/.."
 
-SBT_CMDS="+clean +makePom +packageBin +packageSrc +packageDoc"
+SBT_CMDS="+clean +makePom +packageBin +packageSrc"
 
 sbt $SBT_OPTS $SBT_CMDS
 

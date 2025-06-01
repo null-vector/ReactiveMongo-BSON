@@ -1624,7 +1624,7 @@ private[api] class MacroImpl(val c: Context) {
               tail,
               filter,
               replacement,
-              true
+              altered = true
             )
 
           case TypeRef(_, sym, as) if as.nonEmpty =>
@@ -1689,7 +1689,7 @@ private[api] class MacroImpl(val c: Context) {
             List.empty,
             _ =:= aTpe,
             PlaceholderType,
-            false
+            altered = false
           )
 
         case t => t -> false
@@ -1708,7 +1708,7 @@ private[api] class MacroImpl(val c: Context) {
             List.empty,
             _ == PlaceholderType,
             aTpe,
-            false
+            altered = false
           )._1
 
         case _ => ptype
