@@ -62,7 +62,7 @@ private[reactivemongo] final class ReadableBuffer private[bson] (
 
   /** Reads a UTF-8 C-Style String. */
   def readCString(): String =
-    new String(takeUntilZero(new ArrayBuffer[Byte](16)), "UTF-8")
+    new String(takeUntilZero(new ArrayBuffer[Byte](16)), "UTF-8").intern()
 
   /** Returns the number of readable remaining bytes of this buffer. */
   def readable(): Int = buffer.remaining()
